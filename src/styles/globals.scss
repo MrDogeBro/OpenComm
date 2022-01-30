@@ -1,0 +1,60 @@
+@import 'fonts.scss';
+@import 'colors.scss';
+@import 'tailwind.scss';
+@import 'markdown.scss';
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
+  --color-primary-background: #000;
+  --color-primary-foreground: #fff;
+  --color-primary-brand: #ff0000;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #909090 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #909090;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+body {
+  background-color: var(--color-primary-background);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.h-screen-navbar {
+  height: calc(100vh - 3.5rem);
+}
+
+.grecaptcha-badge {
+  visibility: hidden;
+}

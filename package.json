@@ -1,0 +1,46 @@
+{
+  "name": "open-comm",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "storybook": "start-storybook -s ./public -p 6006",
+    "build-storybook": "build-storybook"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.12.2",
+    "@material-ui/icons": "^4.11.2",
+    "@svgr/webpack": "^5.5.0",
+    "axios": "^0.21.1",
+    "next": "11.1.2",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-markdown": "^7.0.0",
+    "rehype-raw": "^6.0.0",
+    "remark-gfm": "^2.0.0",
+    "remark-slug": "^7.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@storybook/addon-actions": "^6.4.0-alpha.18",
+    "@storybook/addon-essentials": "^6.4.0-alpha.18",
+    "@storybook/addon-links": "^6.4.0-alpha.18",
+    "@storybook/addon-postcss": "^2.0.0",
+    "@storybook/builder-webpack5": "^6.4.0-alpha.18",
+    "@storybook/manager-webpack5": "^6.4.0-alpha.18",
+    "@storybook/react": "^6.4.0-alpha.18",
+    "@storybook/theming": "^6.4.0-alpha.18",
+    "@types/react": "17.0.9",
+    "autoprefixer": "^10.2.6",
+    "babel-loader": "^8.2.2",
+    "postcss": "^8.3.0",
+    "postcss-loader": "^4.2.0",
+    "sass": "^1.34.1",
+    "sass-loader": "^10.1.1",
+    "tailwindcss": "^2.1.4",
+    "tsconfig-paths-webpack-plugin": "^3.5.1",
+    "typescript": "4.3.2"
+  }
+}
