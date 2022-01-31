@@ -15,7 +15,7 @@ export const Footer: React.FC<FooterProps> = (props) => {
         <div className="justify-center flex-grow">
           <p className="font-sans text-md text-center">
             Copyright (©) {new Date().getFullYear()}{' '}
-            {process.env.NEXT_PUBLIC_INFO_COPYRIGHT}
+            OpenComm
           </p>
         </div>
       </div>

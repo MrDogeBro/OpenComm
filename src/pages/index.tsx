@@ -18,7 +18,7 @@ export default class Home extends Component<Props, States> {
     return (
       <div>
         <Head>
-          <title>{process.env.NEXT_PUBLIC_INFO_NAME}</title>
+          <title>OpenComm</title>
           <meta name="description" content="Description" />
         </Head>
         <div className="flex flex-col min-h-screen">

@@ -42,7 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
     >
       <Link href="/">
         <span className="text-2xl font-sans text-primary-fg cursor-pointer">
-          {process.env.NEXT_PUBLIC_INFO_NAME}
+          OpenComm
         </span>
       </Link>
 

@@ -7,7 +7,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <div>
       <Head>
-        <title>${process.env.NEXT_PUBLIC_INFO_NAME}</title>
+        <title>OpenComm</title>
         <meta name="description" content="Description" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -37,35 +37,18 @@ function App({ Component, pageProps }: AppProps) {
         />
         <meta
           name="apple-mobile-web-app-title"
-          content={process.env.NEXT_PUBLIC_INFO_NAME}
+          content="OpenComm"
         />
         <meta
           name="application-name"
-          content={process.env.NEXT_PUBLIC_INFO_NAME}
+          content="OpenComm"
         />
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="theme-color" content="#ffffff" />
-        {loadPlausible()}
       </Head>
       <Component {...pageProps} />
-      {/* Recaptcha inclusion */}
-      {/* <Script */}
-      {/* src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`} */}
-      {/* /> */}
     </div>
   );
 }
-
-const loadPlausible = () => {
-  if (process.env.NODE_ENV === 'production')
-    return (
-      <script
-        async
-        defer
-        data-domain={process.env.NEXT_PUBLIC_INFO_URL}
-        src={`https://stats.${process.env.NEXT_PUBLIC_INFO_URL}/js/plausible.js`}
-      ></script>
-    );
-};
 
 export default App;

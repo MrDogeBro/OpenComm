@@ -1,13 +1,13 @@
 import Head from 'next/head';
 import React from 'react';
 
-interface Props {}
+interface Props { }
 
 const PageNotFound: React.FC<Props> = () => {
   return (
     <div>
       <Head>
-        <title>404 | {process.env.NEXT_PUBLIC_INFO_NAME}</title>
+        <title>404 | OpenComm</title>
         <meta name="description" content="The requested page doesn't exist" />
       </Head>
       <div className="flex justify-center items-center min-h-screen">
