@@ -33,3 +33,9 @@ yarn-error.log*
 
 # include
 !/public
+
+# firebase
+.firebaserc
+ui-debug.log
+firestore-debug.log
+database-debug.log
