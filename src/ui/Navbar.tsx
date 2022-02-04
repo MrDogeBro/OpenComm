@@ -34,6 +34,14 @@ export const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
   const [drawerState, setDrawer] = useState(false);
 
   const links: PageData[] = [
+    {
+      name: "User",
+      location: "/user"
+    },
+    {
+      name: "Base",
+      location: "/base"
+    }
   ];
 
   return (
