@@ -1,14 +1,14 @@
-import { Story } from '@storybook/react';
-import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
-import { Navbar, NavbarProps } from '@ui/Navbar';
+import { Story } from "@storybook/react";
+import { INITIAL_VIEWPORTS } from "@storybook/addon-viewport";
+import { Navbar, NavbarProps } from "@ui/Navbar";
 
 export default {
-  title: 'Navbar',
+  title: "Navbar",
   component: Navbar,
   parameters: {
     viewport: {
       viewports: INITIAL_VIEWPORTS,
-      defaultViewport: 'reponsive',
+      defaultViewport: "reponsive",
     },
   },
 };
@@ -19,6 +19,6 @@ export const Mobile: Story<NavbarProps> = () => <Navbar />;
 
 Mobile.parameters = {
   viewport: {
-    defaultViewport: 'iphonex',
+    defaultViewport: "iphonex",
   },
 };

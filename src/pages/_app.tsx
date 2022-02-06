@@ -1,7 +1,7 @@
-import '@styles/globals.scss';
-import Head from 'next/head';
+import "@styles/globals.scss";
+import Head from "next/head";
 /* import Script from 'next/script'; */
-import type { AppProps } from 'next/app';
+import type { AppProps } from "next/app";
 
 function App({ Component, pageProps }: AppProps) {
   return (
@@ -35,14 +35,8 @@ function App({ Component, pageProps }: AppProps) {
           href="/favicon/safari-pinned-tab.svg"
           color="#000000"
         />
-        <meta
-          name="apple-mobile-web-app-title"
-          content="OpenComm"
-        />
-        <meta
-          name="application-name"
-          content="OpenComm"
-        />
+        <meta name="apple-mobile-web-app-title" content="OpenComm" />
+        <meta name="application-name" content="OpenComm" />
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="theme-color" content="#ffffff" />
       </Head>

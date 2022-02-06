@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import React, { useState } from 'react';
+import Link from "next/link";
+import React, { useState } from "react";
 
-import { Drawer, IconButton } from '@material-ui/core';
+import { Drawer, IconButton } from "@material-ui/core";
 import {
   createTheme,
   ThemeProvider,
   makeStyles,
-} from '@material-ui/core/styles';
-import { Menu } from '@material-ui/icons';
+} from "@material-ui/core/styles";
+import { Menu } from "@material-ui/icons";
 
 export interface NavbarProps {
   className?: string;
@@ -20,28 +20,28 @@ interface PageData {
 
 const theme = createTheme({
   palette: {
-    type: 'dark',
+    type: "dark",
   },
 });
 
 const styles = makeStyles((_) => ({
   drawerPaper: {
-    backgroundColor: '#0c0c0c',
+    backgroundColor: "#0c0c0c",
   },
 }));
 
-export const Navbar: React.FC<NavbarProps> = ({ className = '' }) => {
+export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
   const [drawerState, setDrawer] = useState(false);
 
   const links: PageData[] = [
     {
       name: "User",
-      location: "/user"
+      location: "/user",
     },
     {
       name: "Base",
-      location: "/base"
-    }
+      location: "/base",
+    },
   ];
 
   return (

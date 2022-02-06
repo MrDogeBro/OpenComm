@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export type FooterProps = {
   className?: string;
@@ -14,8 +14,7 @@ export const Footer: React.FC<FooterProps> = (props) => {
       <div className="block md:flex w-full md:items-center md:justify-start">
         <div className="justify-center flex-grow">
           <p className="font-sans text-md text-center">
-            Copyright (©) {new Date().getFullYear()}{' '}
-            OpenComm
+            Copyright (©) {new Date().getFullYear()} OpenComm
           </p>
         </div>
       </div>

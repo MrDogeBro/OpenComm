@@ -53,9 +53,9 @@ class User extends Component<Props, States> {
       });
     });
 
-    (document.getElementById(
-      "remoteAudioStream"
-    ) as HTMLAudioElement).srcObject = this.remoteStream;
+    (
+      document.getElementById("remoteAudioStream") as HTMLAudioElement
+    ).srcObject = this.remoteStream;
   };
 
   handleJoin = async () => {
