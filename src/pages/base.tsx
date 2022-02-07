@@ -9,26 +9,29 @@ import {
   collection,
   doc,
   addDoc,
-  setDoc,
+  getDoc,
+  updateDoc,
   onSnapshot,
 } from "firebase/firestore";
 
 type Props = {};
-type States = {};
+type States = {
+  initalConnection: boolean;
+};
 
 class Base extends Component<Props, States> {
-  private conn: RTCPeerConnection | null = null;
+  private connections: RTCPeerConnection[];
   private localStream: MediaStream | null = null;
   private remoteStream: MediaStream | null = null;
 
   constructor(props: Props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      initalConnection: true,
+    };
 
-    if (typeof window !== "undefined") {
-      this.conn = new RTCPeerConnection();
-    }
+    this.connections = [];
   }
 
   handleSetup = async () => {
@@ -38,13 +41,34 @@ class Base extends Component<Props, States> {
     });
     this.remoteStream = new MediaStream();
 
-    this.localStream.getAudioTracks().forEach((track) => {
+    (document.getElementById(
+      "remoteAudioStream"
+    ) as HTMLAudioElement).srcObject = this.remoteStream;
+  };
+
+  startListen = async () => {
+    const connections = collection(firestore, "connections");
+
+    onSnapshot(connections, (snapshot: any) => {
+      snapshot.docChanges().forEach((change: any) => {
+        if (change.type === "added" && !change.doc.data().answer) {
+          this.handleJoin(change.doc.id);
+        }
+      });
+    });
+  };
+
+  handleJoin = async (connId: string) => {
+    this.connections.push(new RTCPeerConnection());
+    let conn = this.connections[this.connections.length - 1];
+
+    this.localStream?.getAudioTracks().forEach((track) => {
       if (this.localStream == null) return;
 
-      this.conn?.addTrack(track, this.localStream);
+      conn.addTrack(track, this.localStream);
     });
 
-    this.conn?.addEventListener("track", async (e) => {
+    conn.addEventListener("track", async (e) => {
       e.streams[0].getAudioTracks().forEach((track) => {
         if (this.remoteStream == null) return;
 
@@ -52,48 +76,37 @@ class Base extends Component<Props, States> {
       });
     });
 
-    (
-      document.getElementById("remoteAudioStream") as HTMLAudioElement
-    ).srcObject = this.remoteStream;
-  };
+    const connDoc = doc(collection(firestore, "connections"), connId);
+    const answerCandidates = collection(connDoc, "answerCandidates");
+    const offerCandidates = collection(connDoc, "offerCandidates");
 
-  handleStart = async () => {
-    console.log("hey");
-    const callDoc = doc(collection(firestore, "calls"));
-    const offerCandidates = collection(callDoc, "offerCandidates");
-    const answerCandidates = collection(callDoc, "answerCandidates");
-
-    console.log(callDoc.id);
-
-    this.conn?.addEventListener(
+    conn.addEventListener(
       "icecandidate",
-      (e) => e.candidate && addDoc(offerCandidates, e.candidate.toJSON())
+      (e) => e.candidate && addDoc(answerCandidates, e.candidate.toJSON())
     );
 
-    const offerDescription = await this.conn?.createOffer();
-    this.conn?.setLocalDescription(offerDescription);
+    const connData = (await getDoc(connDoc)).data();
 
-    const offer = {
-      sdp: offerDescription?.sdp,
-      type: offerDescription?.type,
+    const offerDescription = connData?.offer;
+    await conn.setRemoteDescription(
+      new RTCSessionDescription(offerDescription)
+    );
+
+    const answerDescription = await conn.createAnswer();
+    await conn.setLocalDescription(answerDescription);
+
+    const answer = {
+      type: answerDescription?.type,
+      sdp: answerDescription?.sdp,
     };
 
-    await setDoc(callDoc, { offer });
+    await updateDoc(connDoc, { answer });
 
-    onSnapshot(callDoc, (snapshot: any) => {
-      const data = snapshot.data();
-
-      if (!this.conn?.currentRemoteDescription && data?.answer) {
-        const answerDescription = new RTCSessionDescription(data.answer);
-        this.conn?.setRemoteDescription(answerDescription);
-      }
-    });
-
-    onSnapshot(answerCandidates, (snapshot: any) => {
+    onSnapshot(offerCandidates, (snapshot: any) => {
       snapshot.docChanges().forEach((change: any) => {
         if (change.type === "added") {
-          const candidate = new RTCIceCandidate(change.doc.data());
-          this.conn?.addIceCandidate(candidate);
+          let data = change.doc.data();
+          conn.addIceCandidate(new RTCIceCandidate(data));
         }
       });
     });
@@ -109,20 +122,21 @@ class Base extends Component<Props, States> {
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-grow">
-            <audio id="remoteAudioStream" autoPlay playsInline></audio>
+            <audio
+              id="remoteAudioStream"
+              title="OpenComm Base"
+              autoPlay
+              playsInline
+            ></audio>
 
             <div className="justify-center pt-16 grid gap-4 grid-flow-col">
               <button
-                onClick={this.handleSetup}
+                onClick={() => {
+                  this.handleSetup().then(this.startListen);
+                }}
                 className="bg-red-600 text-white w-32 h-32"
               >
                 Setup
-              </button>
-              <button
-                onClick={this.handleStart}
-                className="bg-red-600 text-white w-32 h-32"
-              >
-                Start
               </button>
             </div>
           </main>
