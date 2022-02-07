@@ -9,8 +9,7 @@ import {
   collection,
   doc,
   addDoc,
-  getDoc,
-  updateDoc,
+  setDoc,
   onSnapshot,
 } from "firebase/firestore";
 
@@ -53,49 +52,45 @@ class User extends Component<Props, States> {
       });
     });
 
-    (
-      document.getElementById("remoteAudioStream") as HTMLAudioElement
-    ).srcObject = this.remoteStream;
+    (document.getElementById(
+      "remoteAudioStream"
+    ) as HTMLAudioElement).srcObject = this.remoteStream;
   };
 
-  handleJoin = async () => {
-    console.log("hello");
-    const callId = (document.getElementById("callId") as HTMLInputElement)
-      .value;
-    const callDoc = doc(collection(firestore, "calls"), callId);
-    const answerCandidates = collection(callDoc, "answerCandidates");
-    const offerCandidates = collection(callDoc, "offerCandidates");
+  handleStart = async () => {
+    const connDoc = doc(collection(firestore, "connections"));
+    const offerCandidates = collection(connDoc, "offerCandidates");
+    const answerCandidates = collection(connDoc, "answerCandidates");
 
     this.conn?.addEventListener(
       "icecandidate",
-      (e) => e.candidate && addDoc(answerCandidates, e.candidate.toJSON())
+      (e) => e.candidate && addDoc(offerCandidates, e.candidate.toJSON())
     );
 
-    console.log(callDoc.id);
-    const callData = (await getDoc(callDoc)).data();
+    const offerDescription = await this.conn?.createOffer();
+    this.conn?.setLocalDescription(offerDescription);
 
-    const offerDescription = callData?.offer;
-    await this.conn?.setRemoteDescription(
-      new RTCSessionDescription(offerDescription)
-    );
-
-    const answerDescription = await this.conn?.createAnswer();
-    await this.conn?.setLocalDescription(answerDescription);
-
-    const answer = {
-      type: answerDescription?.type,
-      sdp: answerDescription?.sdp,
+    const offer = {
+      sdp: offerDescription?.sdp,
+      type: offerDescription?.type,
     };
 
-    await updateDoc(callDoc, { answer });
+    await setDoc(connDoc, { offer });
 
-    onSnapshot(offerCandidates, (snapshot: any) => {
+    onSnapshot(connDoc, (snapshot: any) => {
+      const data = snapshot.data();
+
+      if (!this.conn?.currentRemoteDescription && data?.answer) {
+        const answerDescription = new RTCSessionDescription(data.answer);
+        this.conn?.setRemoteDescription(answerDescription);
+      }
+    });
+
+    onSnapshot(answerCandidates, (snapshot: any) => {
       snapshot.docChanges().forEach((change: any) => {
-        console.log(change);
-
         if (change.type === "added") {
-          let data = change.doc.data();
-          this.conn?.addIceCandidate(new RTCIceCandidate(data));
+          const candidate = new RTCIceCandidate(change.doc.data());
+          this.conn?.addIceCandidate(candidate);
         }
       });
     });
@@ -111,29 +106,22 @@ class User extends Component<Props, States> {
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-grow">
-            <audio id="remoteAudioStream" autoPlay playsInline></audio>
+            <audio
+              id="remoteAudioStream"
+              title="OpenComm User"
+              autoPlay
+              playsInline
+            ></audio>
 
             <div className="justify-center pt-16 grid gap-4 grid-flow-col">
               <button
-                onClick={this.handleSetup}
+                onClick={() => {
+                  this.handleSetup().then(this.handleStart);
+                }}
                 className="bg-red-600 text-white w-32 h-32"
               >
-                Setup
+                Start
               </button>
-              <button
-                onClick={this.handleJoin}
-                className="bg-red-600 text-white w-32 h-32"
-              >
-                Join
-              </button>
-            </div>
-
-            <div className="pt-5 flex justify-center">
-              <input
-                id="callId"
-                className="bg-gray-800 text-white py-1 px-4"
-                placeholder="Call ID"
-              />
             </div>
           </main>
           <Footer />
