@@ -1,10 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
-let firebaseConfig;
+let firestore;
 
-if (process.env.NEXT_PUBLIC_FIREBASE_REMOTE_FIRESTORE == "true")
-  firebaseConfig = {
+if (process.env.NEXT_PUBLIC_FIREBASE_REMOTE_FIRESTORE == "true") {
+  const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -12,12 +12,13 @@ if (process.env.NEXT_PUBLIC_FIREBASE_REMOTE_FIRESTORE == "true")
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   };
-else
-  firebaseConfig = {
+  firestore = getFirestore(initializeApp(firebaseConfig));
+} else {
+  initializeApp({
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    databaseURL: "http://localhost:9000/?ns=opencomm-local",
-  };
+  })
+  firestore = getFirestore();
+  connectFirestoreEmulator(firestore, "localhost", 8080);
+}
 
-const firebase = initializeApp(firebaseConfig);
-
-export default getFirestore(firebase);
+export default firestore;
