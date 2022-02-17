@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator, Firestore } from "firebase/firestore";
 
-let firestore;
+let firestore: Firestore;
 
 if (process.env.NEXT_PUBLIC_FIREBASE_REMOTE_FIRESTORE == "true") {
   const firebaseConfig = {
