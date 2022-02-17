@@ -4,6 +4,8 @@ import { Component } from "react";
 import { Navbar } from "@ui/Navbar";
 import { Footer } from "@ui/Footer";
 
+import { Mic } from "@utils/mic";
+
 import firestore from "@firestore";
 import {
   collection,
@@ -17,6 +19,7 @@ import {
 type Props = {};
 type States = {
   initalConnection: boolean;
+  muted: boolean;
 };
 
 class Base extends Component<Props, States> {
@@ -29,6 +32,7 @@ class Base extends Component<Props, States> {
 
     this.state = {
       initalConnection: true,
+      muted: false,
     };
 
     this.connections = [];
@@ -39,6 +43,7 @@ class Base extends Component<Props, States> {
       video: false,
       audio: true,
     });
+
     this.remoteStream = new MediaStream();
 
     (document.getElementById(
@@ -137,6 +142,21 @@ class Base extends Component<Props, States> {
                 className="bg-red-600 text-white w-32 h-32"
               >
                 Setup
+              </button>
+
+              <button
+                onClick={() => {
+                  if (this.localStream == null) return;
+
+                  if (Mic.isMuted(this.localStream))
+                    Mic.unmute(this.localStream);
+                  else Mic.mute(this.localStream);
+
+                  this.setState({ muted: Mic.isMuted(this.localStream) });
+                }}
+                className="bg-red-600 text-white w-32 h-32"
+              >
+                {this.state.muted ? "Unmute" : "Mute"}
               </button>
             </div>
           </main>
