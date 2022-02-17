@@ -4,6 +4,8 @@ import { Component } from "react";
 import { Navbar } from "@ui/Navbar";
 import { Footer } from "@ui/Footer";
 
+import { Mic } from "@utils/mic";
+
 import firestore from "@firestore";
 import {
   collection,
@@ -14,7 +16,9 @@ import {
 } from "firebase/firestore";
 
 type Props = {};
-type States = {};
+type States = {
+  muted: boolean;
+};
 
 class User extends Component<Props, States> {
   private conn: RTCPeerConnection | null = null;
@@ -24,7 +28,9 @@ class User extends Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      muted: true,
+    };
 
     if (typeof window !== "undefined") {
       this.conn = new RTCPeerConnection();
@@ -36,6 +42,9 @@ class User extends Component<Props, States> {
       video: false,
       audio: true,
     });
+
+    Mic.mute(this.localStream);
+
     this.remoteStream = new MediaStream();
 
     this.localStream.getAudioTracks().forEach((track) => {
@@ -121,6 +130,21 @@ class User extends Component<Props, States> {
                 className="bg-red-600 text-white w-32 h-32"
               >
                 Start
+              </button>
+
+              <button
+                onClick={() => {
+                  if (this.localStream == null) return;
+
+                  if (Mic.isMuted(this.localStream))
+                    Mic.unmute(this.localStream);
+                  else Mic.mute(this.localStream);
+
+                  this.setState({ muted: Mic.isMuted(this.localStream) });
+                }}
+                className="bg-red-600 text-white w-32 h-32"
+              >
+                {this.state.muted ? "Unmute" : "Mute"}
               </button>
             </div>
           </main>
