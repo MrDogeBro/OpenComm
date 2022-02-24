@@ -3,6 +3,7 @@ import { Component } from "react";
 
 import { Navbar } from "@ui/Navbar";
 import { Footer } from "@ui/Footer";
+import { Button } from "@ui/Button";
 
 import { Mic } from "@utils/mic";
 
@@ -18,6 +19,7 @@ import {
 type Props = {};
 type States = {
   muted: boolean;
+  started: boolean;
 };
 
 class User extends Component<Props, States> {
@@ -30,6 +32,7 @@ class User extends Component<Props, States> {
 
     this.state = {
       muted: true,
+      started: false,
     };
 
     if (typeof window !== "undefined") {
@@ -43,6 +46,7 @@ class User extends Component<Props, States> {
       audio: true,
     });
 
+    this.setState({ started: true });
     Mic.mute(this.localStream);
 
     this.remoteStream = new MediaStream();
@@ -61,9 +65,9 @@ class User extends Component<Props, States> {
       });
     });
 
-    (document.getElementById(
-      "remoteAudioStream"
-    ) as HTMLAudioElement).srcObject = this.remoteStream;
+    (
+      document.getElementById("remoteAudioStream") as HTMLAudioElement
+    ).srcObject = this.remoteStream;
   };
 
   handleStart = async () => {
@@ -123,16 +127,16 @@ class User extends Component<Props, States> {
             ></audio>
 
             <div className="justify-center pt-16 grid gap-4 grid-flow-col">
-              <button
+              <Button
                 onClick={() => {
                   this.handleSetup().then(this.handleStart);
                 }}
                 className="bg-red-600 text-white w-32 h-32"
               >
                 Start
-              </button>
+              </Button>
 
-              <button
+              <Button
                 onClick={() => {
                   if (this.localStream == null) return;
 
@@ -142,10 +146,11 @@ class User extends Component<Props, States> {
 
                   this.setState({ muted: Mic.isMuted(this.localStream) });
                 }}
-                className="bg-red-600 text-white w-32 h-32"
+                className="disabled:bg-blue-200 bg-red-600 text-white w-32 h-32"
+                disabled={!this.state.started}
               >
                 {this.state.muted ? "Unmute" : "Mute"}
-              </button>
+              </Button>
             </div>
           </main>
           <Footer />

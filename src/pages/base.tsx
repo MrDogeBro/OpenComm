@@ -3,6 +3,7 @@ import { Component } from "react";
 
 import { Navbar } from "@ui/Navbar";
 import { Footer } from "@ui/Footer";
+import { Button } from "@ui/Button";
 
 import { Mic } from "@utils/mic";
 
@@ -20,6 +21,7 @@ type Props = {};
 type States = {
   initalConnection: boolean;
   muted: boolean;
+  started: boolean;
 };
 
 class Base extends Component<Props, States> {
@@ -33,6 +35,7 @@ class Base extends Component<Props, States> {
     this.state = {
       initalConnection: true,
       muted: false,
+      started: false,
     };
 
     this.connections = [];
@@ -44,11 +47,12 @@ class Base extends Component<Props, States> {
       audio: true,
     });
 
+    this.setState({ started: true });
     this.remoteStream = new MediaStream();
 
-    (document.getElementById(
-      "remoteAudioStream"
-    ) as HTMLAudioElement).srcObject = this.remoteStream;
+    (
+      document.getElementById("remoteAudioStream") as HTMLAudioElement
+    ).srcObject = this.remoteStream;
   };
 
   startListen = async () => {
@@ -135,16 +139,16 @@ class Base extends Component<Props, States> {
             ></audio>
 
             <div className="justify-center pt-16 grid gap-4 grid-flow-col">
-              <button
+              <Button
                 onClick={() => {
                   this.handleSetup().then(this.startListen);
                 }}
                 className="bg-red-600 text-white w-32 h-32"
               >
                 Setup
-              </button>
+              </Button>
 
-              <button
+              <Button
                 onClick={() => {
                   if (this.localStream == null) return;
 
@@ -155,9 +159,10 @@ class Base extends Component<Props, States> {
                   this.setState({ muted: Mic.isMuted(this.localStream) });
                 }}
                 className="bg-red-600 text-white w-32 h-32"
+                disabled={!this.state.started}
               >
                 {this.state.muted ? "Unmute" : "Mute"}
-              </button>
+              </Button>
             </div>
           </main>
           <Footer />
