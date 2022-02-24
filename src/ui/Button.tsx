@@ -24,7 +24,7 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <button
       disabled={disabled || loading}
-      className={`${colorClassnames[color]} font-bold flex items-center justify-center py-2 px-6 text-sm rounded-md transition duration-250 ease-in-out disabled:text-gray-400 disabled:bg-gray-600 ${className}`}
+      className={`${colorClassnames[color]} font-bold flex items-center justify-center py-2 px-6 text-sm rounded-md transition duration-250 ease-in-out disabled:text-gray-400 disabled:bg-gray-600 disabled:cursor-not-allowed ${className}`}
       {...props}
     >
       <span className={loading ? "opacity-0" : "flex items-center"}>
