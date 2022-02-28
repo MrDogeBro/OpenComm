@@ -1,13 +1,25 @@
 export class Mic {
-  static mute = (stream: MediaStream) => {
+  static mute = (track: MediaStreamTrack) => {
+    track.enabled = false;
+  };
+
+  static unmute = (track: MediaStreamTrack) => {
+    track.enabled = true;
+  };
+
+  static isMuted = (track: MediaStreamTrack) => {
+    return !track.enabled;
+  };
+
+  static muteStream = (stream: MediaStream) => {
     stream.getAudioTracks().forEach((track) => (track.enabled = false));
   };
 
-  static unmute = (stream: MediaStream) => {
+  static unmuteStream = (stream: MediaStream) => {
     stream.getAudioTracks().forEach((track) => (track.enabled = true));
   };
 
-  static isMuted = (stream: MediaStream) => {
+  static isMutedStream = (stream: MediaStream) => {
     let muted = false;
     stream
       .getAudioTracks()
