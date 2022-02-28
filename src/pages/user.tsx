@@ -18,8 +18,10 @@ import {
 
 type Props = {};
 type States = {
-  muted: boolean;
+  muted: boolean[];
+  listening: boolean[];
   started: boolean;
+  remoteStreamUpdate: boolean;
 };
 
 class User extends Component<Props, States> {
@@ -31,8 +33,10 @@ class User extends Component<Props, States> {
     super(props);
 
     this.state = {
-      muted: true,
+      muted: [],
+      listening: [],
       started: false,
+      remoteStreamUpdate: true,
     };
 
     if (typeof window !== "undefined") {
@@ -46,8 +50,17 @@ class User extends Component<Props, States> {
       audio: true,
     });
 
+    for (let i = 0; i < 3; i++) {
+      this.localStream?.addTrack(this.localStream.clone().getAudioTracks()[0]);
+      this.setState({ muted: [...this.state.muted, true] });
+      this.setState({ listening: [...this.state.listening, true] });
+    }
+
+    this.setState({ muted: [...this.state.muted, true] });
+    this.setState({ listening: [...this.state.listening, true] });
+
     this.setState({ started: true });
-    Mic.mute(this.localStream);
+    Mic.muteStream(this.localStream);
 
     this.remoteStream = new MediaStream();
 
@@ -62,6 +75,7 @@ class User extends Component<Props, States> {
         if (this.remoteStream == null) return;
 
         this.remoteStream.addTrack(track);
+        this.setState({ remoteStreamUpdate: !this.state.remoteStreamUpdate });
       });
     });
 
@@ -126,31 +140,84 @@ class User extends Component<Props, States> {
               playsInline
             ></audio>
 
-            <div className="justify-center pt-16 grid gap-4 grid-flow-col">
+            <div className="flex justify-center pt-16 ">
               <Button
                 onClick={() => {
                   this.handleSetup().then(this.handleStart);
                 }}
-                className="bg-red-600 text-white w-32 h-32"
+                color="primary"
+                disabled={this.state.started}
               >
                 Start
               </Button>
+            </div>
 
-              <Button
-                onClick={() => {
-                  if (this.localStream == null) return;
+            <div className="grid gap-4 grid-flow-col justify-center pt-6">
+              {this.localStream?.getAudioTracks().map((track, index) => {
+                return (
+                  <div>
+                    <h1 key={index + 1} className="text-white p-3 text-center">
+                      Channel {index + 1}
+                    </h1>
+                    <Button
+                      onClick={() => {
+                        if (track == null) return;
 
-                  if (Mic.isMuted(this.localStream))
-                    Mic.unmute(this.localStream);
-                  else Mic.mute(this.localStream);
+                        if (Mic.isMuted(track)) Mic.unmute(track);
+                        else Mic.mute(track);
 
-                  this.setState({ muted: Mic.isMuted(this.localStream) });
-                }}
-                className="disabled:bg-blue-200 bg-red-600 text-white w-32 h-32"
-                disabled={!this.state.started}
-              >
-                {this.state.muted ? "Unmute" : "Mute"}
-              </Button>
+                        let mutedStateTemp = this.state.muted;
+                        mutedStateTemp[index] = Mic.isMuted(track);
+
+                        this.setState({
+                          muted: mutedStateTemp,
+                        });
+                      }}
+                      disabled={!this.state.started}
+                      color="primary"
+                      className="w-full"
+                      key={index}
+                    >
+                      {this.state.muted[index] ? "Unmute" : "Mute"}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="grid gap-4 grid-flow-col justify-center pt-6">
+              {this.remoteStream?.getAudioTracks().map((track, index) => {
+                return (
+                  <div>
+                    <h1 key={index + 1} className="text-white p-3 text-center">
+                      Channel {index + 1}
+                    </h1>
+                    <Button
+                      onClick={() => {
+                        if (track == null) return;
+
+                        if (Mic.isMuted(track)) Mic.unmute(track);
+                        else Mic.mute(track);
+
+                        let listeningStateTemp = this.state.listening;
+                        listeningStateTemp[index] = !Mic.isMuted(track);
+
+                        this.setState({
+                          listening: listeningStateTemp,
+                        });
+                      }}
+                      disabled={!this.state.started}
+                      color="secondary"
+                      className="w-full"
+                      key={index}
+                    >
+                      {this.state.listening[index]
+                        ? "Stop Listening"
+                        : "Listen"}
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           </main>
           <Footer />

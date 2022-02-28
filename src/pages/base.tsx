@@ -6,6 +6,7 @@ import { Footer } from "@ui/Footer";
 import { Button } from "@ui/Button";
 
 import { Mic } from "@utils/mic";
+import { sleep } from "@utils/time";
 
 import firestore from "@firestore";
 import {
@@ -20,25 +21,24 @@ import {
 type Props = {};
 type States = {
   initalConnection: boolean;
-  muted: boolean;
   started: boolean;
 };
 
 class Base extends Component<Props, States> {
   private connections: RTCPeerConnection[];
+  private remoteStreams: MediaStream[];
   private localStream: MediaStream | null = null;
-  private remoteStream: MediaStream | null = null;
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
       initalConnection: true,
-      muted: false,
       started: false,
     };
 
     this.connections = [];
+    this.remoteStreams = [];
   }
 
   handleSetup = async () => {
@@ -47,12 +47,15 @@ class Base extends Component<Props, States> {
       audio: true,
     });
 
+    for (let i = 0; i < 3; i++)
+      this.localStream?.addTrack(this.localStream.clone().getAudioTracks()[0]);
+
     this.setState({ started: true });
-    this.remoteStream = new MediaStream();
+    for (let i = 0; i < 4; i++) this.remoteStreams.push(new MediaStream());
 
     (
       document.getElementById("remoteAudioStream") as HTMLAudioElement
-    ).srcObject = this.remoteStream;
+    ).srcObject = this.remoteStreams[0];
   };
 
   startListen = async () => {
@@ -78,10 +81,10 @@ class Base extends Component<Props, States> {
     });
 
     conn.addEventListener("track", async (e) => {
-      e.streams[0].getAudioTracks().forEach((track) => {
-        if (this.remoteStream == null) return;
+      e.streams[0].getAudioTracks().forEach((track, index) => {
+        if (this.remoteStreams.length == 0) return;
 
-        this.remoteStream.addTrack(track);
+        this.remoteStreams[index].addTrack(track);
       });
     });
 
@@ -92,6 +95,14 @@ class Base extends Component<Props, States> {
     conn.addEventListener(
       "icecandidate",
       (e) => e.candidate && addDoc(answerCandidates, e.candidate.toJSON())
+    );
+
+    conn.addEventListener("iceconnectionstatechange", async () =>
+      sleep(5000).then(() => {
+        if (conn.iceConnectionState != "disconnected") return;
+
+        console.log("User disconnected");
+      })
     );
 
     const connData = (await getDoc(connDoc)).data();
@@ -143,25 +154,9 @@ class Base extends Component<Props, States> {
                 onClick={() => {
                   this.handleSetup().then(this.startListen);
                 }}
-                className="bg-red-600 text-white w-32 h-32"
+                color="primary"
               >
                 Setup
-              </Button>
-
-              <Button
-                onClick={() => {
-                  if (this.localStream == null) return;
-
-                  if (Mic.isMuted(this.localStream))
-                    Mic.unmute(this.localStream);
-                  else Mic.mute(this.localStream);
-
-                  this.setState({ muted: Mic.isMuted(this.localStream) });
-                }}
-                className="bg-red-600 text-white w-32 h-32"
-                disabled={!this.state.started}
-              >
-                {this.state.muted ? "Unmute" : "Mute"}
               </Button>
             </div>
           </main>
