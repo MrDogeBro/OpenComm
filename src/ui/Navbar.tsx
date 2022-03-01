@@ -1,13 +1,11 @@
 import Link from "next/link";
 import React, { useState } from "react";
 
-import { Drawer, IconButton } from "@material-ui/core";
-import {
-  createTheme,
-  ThemeProvider,
-  makeStyles,
-} from "@material-ui/core/styles";
-import { Menu } from "@material-ui/icons";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { makeStyles } from "@mui/styles";
+import { Menu } from "@mui/icons-material";
 
 export interface NavbarProps {
   className?: string;
@@ -20,11 +18,11 @@ interface PageData {
 
 const theme = createTheme({
   palette: {
-    type: "dark",
+    mode: "dark",
   },
 });
 
-const styles = makeStyles((_) => ({
+const styles = makeStyles((_: any) => ({
   drawerPaper: {
     backgroundColor: "#0c0c0c",
   },
