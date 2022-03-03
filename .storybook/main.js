@@ -1,39 +1,43 @@
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 module.exports = {
   core: {
-    builder: 'webpack5',
+    builder: "webpack5",
   },
-  stories: ['../src/stories/**/*.story.@(ts|tsx|js|jsx|mdx)'],
+  stories: ["../src/stories/**/*.story.@(ts|tsx|js|jsx|mdx)"],
   addons: [
-    '@storybook/addon-links',
-    '@storybook/addon-essentials',
+    "@storybook/addon-links",
+    "@storybook/addon-essentials",
+    "storybook-addon-material-ui5",
     {
-      name: '@storybook/addon-postcss',
+      name: "@storybook/addon-postcss",
       options: {
         postcssLoaderOptions: {
-          implementation: require('postcss'),
+          implementation: require("postcss"),
         },
       },
     },
   ],
+  features: {
+    emotionAlias: false,
+  },
   webpackFinal: (config) => {
     // SVGR Loader
     const fileLoaderRule = config.module.rules.find(
-      (rule) => rule.test && rule.test.test('.svg')
+      (rule) => rule.test && rule.test.test(".svg")
     );
     fileLoaderRule.exclude = /\.svg$/;
 
     config.module.rules.push({
       test: /\.svg$/,
-      use: ['@svgr/webpack'],
+      use: ["@svgr/webpack"],
     });
 
     // SASS/PostCSS Loader
 
     config.module.rules.push({
       test: /\.scss$/,
-      use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader'],
+      use: ["style-loader", "css-loader", "sass-loader", "postcss-loader"],
     });
 
     // TS Paths
@@ -43,6 +47,6 @@ module.exports = {
     return config;
   },
   typescript: {
-    reactDocgen: 'none',
+    reactDocgen: "none",
   },
 };
