@@ -3,9 +3,11 @@ import React, { useState } from "react";
 
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import { makeStyles } from "@mui/styles";
 import { Menu } from "@mui/icons-material";
+
+import { muiTheme } from "@styles/theme";
 
 export interface NavbarProps {
   className?: string;
@@ -15,12 +17,6 @@ interface PageData {
   name: string;
   location: string;
 }
-
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
 
 const styles = makeStyles((_: any) => ({
   drawerPaper: {
@@ -67,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
       </div>
 
       <div className="block md:hidden">
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={muiTheme}>
           <IconButton
             aria-label="Open navigation"
             className="relative left-3"
