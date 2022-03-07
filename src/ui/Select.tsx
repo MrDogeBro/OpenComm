@@ -11,7 +11,7 @@ import { muiTheme } from "@styles/theme";
 
 export type SelectItem = {
   label: string;
-  value: number | string;
+  value: string;
 };
 
 export type SelectProps = {
@@ -19,6 +19,7 @@ export type SelectProps = {
   label: string;
   id?: string;
   labelId: string;
+  value?: string;
   onChange: { (event: SelectChangeEvent): void };
   items: SelectItem[];
 };
@@ -26,8 +27,9 @@ export type SelectProps = {
 export const Select: React.FC<SelectProps> = ({
   className = "",
   label,
-  id,
+  id = "",
   labelId,
+  value = "",
   items,
   onChange,
 }) => {
@@ -41,6 +43,7 @@ export const Select: React.FC<SelectProps> = ({
             id={id}
             label={label}
             onChange={onChange}
+            value={value}
           >
             {items.map((item, index) => {
               return (
