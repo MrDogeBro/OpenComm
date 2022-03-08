@@ -4,8 +4,8 @@ import { Component } from "react";
 import { Navbar } from "@ui/Navbar";
 import { Footer } from "@ui/Footer";
 import { Button } from "@ui/Button";
+import { Select, SelectItem } from "@ui/Select";
 
-import { Mic } from "@utils/mic";
 import { sleep } from "@utils/time";
 
 import firestore from "@firestore";
@@ -17,11 +17,14 @@ import {
   updateDoc,
   onSnapshot,
 } from "firebase/firestore";
+import { SelectChangeEvent } from "@mui/material";
 
 type Props = {};
 type States = {
   initalConnection: boolean;
   started: boolean;
+  outputMediaDevices: SelectItem[];
+  currentMediaOutputs: string[];
 };
 
 class Base extends Component<Props, States> {
@@ -35,6 +38,8 @@ class Base extends Component<Props, States> {
     this.state = {
       initalConnection: true,
       started: false,
+      outputMediaDevices: new Array(4),
+      currentMediaOutputs: new Array(4),
     };
 
     this.connections = [];
@@ -42,16 +47,40 @@ class Base extends Component<Props, States> {
   }
 
   handleSetup = async () => {
+    if (typeof window === "undefined") return;
+
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia ||
+      // @ts-ignore
+      !navigator.mediaDevices.selectAudioOutput
+    ) {
+      console.error("Media device methods not supported.");
+      return;
+    }
+
     this.localStream = await navigator.mediaDevices.getUserMedia({
       video: false,
       audio: true,
     });
 
+    // @ts-ignore
+    let device = await navigator.mediaDevices.selectAudioOutput();
+    let currentOutputs: string[] = new Array(
+      this.state.currentMediaOutputs.length
+    );
+
+    currentOutputs.fill(device.deviceId);
+    this.setState({ currentMediaOutputs: currentOutputs });
+
+    this.getMediaDevices();
+
     for (let i = 0; i < 3; i++)
       this.localStream?.addTrack(this.localStream.clone().getAudioTracks()[0]);
 
     this.setState({ started: true });
-    for (let i = 0; i < 4; i++) this.remoteStreams.push(new MediaStream());
+    // for (let i = 0; i < 4; i++) this.remoteStreams.push(new MediaStream());
+    this.remoteStreams.fill(new MediaStream());
 
     (
       document.getElementById("remoteAudioStream") as HTMLAudioElement
@@ -132,6 +161,30 @@ class Base extends Component<Props, States> {
     });
   };
 
+  getMediaDevices = () => {
+    let outputMediaDevices: SelectItem[] = [];
+
+    if (typeof window === "undefined") return;
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      console.error("enumerateDevices() not supported.");
+      return;
+    }
+
+    navigator.mediaDevices
+      .enumerateDevices()
+      .then((devices: MediaDeviceInfo[]) => {
+        devices.forEach((device: MediaDeviceInfo) => {
+          if (device.kind == "audiooutput")
+            outputMediaDevices.push({
+              label: device.label,
+              value: device.deviceId,
+            });
+        });
+      })
+      .then(() => this.setState({ outputMediaDevices: outputMediaDevices }));
+  };
+
   render() {
     return (
       <div>
@@ -159,6 +212,35 @@ class Base extends Component<Props, States> {
                 Setup
               </Button>
             </div>
+            {this.state.started ? (
+              <div className="grid gap-4 grid-flow-col justify-center pt-6">
+                <Select
+                  className="w-64"
+                  label="Channel 1 Output"
+                  labelId="channel-1-output-label"
+                  value={
+                    this.state.outputMediaDevices.find((obj) => {
+                      if (obj == undefined) return false;
+                      return obj.value == this.state.currentMediaOutputs[0];
+                    })?.value
+                  }
+                  items={this.state.outputMediaDevices}
+                  onChange={(event: SelectChangeEvent) => {
+                    let audio = document.getElementById(
+                      "remoteAudioStream"
+                    ) as HTMLAudioElement;
+                    // @ts-ignore
+                    audio.setSinkId(event.target.value).then(() => {
+                      let outputs = this.state.currentMediaOutputs;
+                      outputs[0] = event.target.value;
+
+                      this.setState({ currentMediaOutputs: outputs });
+                      console.log(audio);
+                    });
+                  }}
+                />
+              </div>
+            ) : null}
           </main>
           <Footer />
         </div>
