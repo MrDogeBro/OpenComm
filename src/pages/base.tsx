@@ -25,25 +25,31 @@ type States = {
   started: boolean;
   outputMediaDevices: SelectItem[];
   currentMediaOutputs: string[];
+  inputMediaDevices: SelectItem[];
+  currentMediaInputs: string[];
 };
 
 class Base extends Component<Props, States> {
   private connections: RTCPeerConnection[];
   private remoteStreams: MediaStream[];
   private localStream: MediaStream | null = null;
+  private numStreams: number;
 
   constructor(props: Props) {
     super(props);
 
+    this.connections = [];
+    this.remoteStreams = new Array();
+    this.numStreams = 4;
+
     this.state = {
       initalConnection: true,
       started: false,
-      outputMediaDevices: new Array(4),
-      currentMediaOutputs: new Array(4),
+      outputMediaDevices: new Array(this.numStreams),
+      currentMediaOutputs: new Array(this.numStreams),
+      inputMediaDevices: new Array(this.numStreams),
+      currentMediaInputs: new Array(this.numStreams),
     };
-
-    this.connections = [];
-    this.remoteStreams = [];
   }
 
   handleSetup = async () => {
@@ -75,16 +81,22 @@ class Base extends Component<Props, States> {
 
     this.getMediaDevices();
 
-    for (let i = 0; i < 3; i++)
+    for (let i = 0; i < this.numStreams - 1; i++)
       this.localStream?.addTrack(this.localStream.clone().getAudioTracks()[0]);
 
     this.setState({ started: true });
-    // for (let i = 0; i < 4; i++) this.remoteStreams.push(new MediaStream());
-    this.remoteStreams.fill(new MediaStream());
 
-    (
-      document.getElementById("remoteAudioStream") as HTMLAudioElement
-    ).srcObject = this.remoteStreams[0];
+    for (let i = 0; i < this.numStreams; i++)
+      this.remoteStreams.push(new MediaStream());
+
+    for (let i = 0; i < this.numStreams; i++) {
+      let audio = document.getElementById(
+        `remoteAudioStream${i}`
+      ) as HTMLAudioElement;
+      audio.srcObject = this.remoteStreams[i];
+      // @ts-ignore
+      audio.setSinkId(currentOutputs[i]);
+    }
   };
 
   startListen = async () => {
@@ -163,6 +175,7 @@ class Base extends Component<Props, States> {
 
   getMediaDevices = () => {
     let outputMediaDevices: SelectItem[] = [];
+    let inputMediaDevices: SelectItem[] = [];
 
     if (typeof window === "undefined") return;
 
@@ -177,6 +190,11 @@ class Base extends Component<Props, States> {
         devices.forEach((device: MediaDeviceInfo) => {
           if (device.kind == "audiooutput")
             outputMediaDevices.push({
+              label: device.label,
+              value: device.deviceId,
+            });
+          else if (device.kind == "audioinput")
+            inputMediaDevices.push({
               label: device.label,
               value: device.deviceId,
             });
@@ -195,12 +213,17 @@ class Base extends Component<Props, States> {
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-grow">
-            <audio
-              id="remoteAudioStream"
-              title="OpenComm Base"
-              autoPlay
-              playsInline
-            ></audio>
+            {this.localStream?.getAudioTracks().map((_, index) => {
+              return (
+                <audio
+                  id={`remoteAudioStream${index}`}
+                  title={`OpenComm Base Channel ${index + 1}`}
+                  autoPlay
+                  playsInline
+                  key={index + 1}
+                ></audio>
+              );
+            })}
 
             <div className="justify-center pt-16 grid gap-4 grid-flow-col">
               <Button
@@ -212,35 +235,69 @@ class Base extends Component<Props, States> {
                 Setup
               </Button>
             </div>
-            {this.state.started ? (
-              <div className="grid gap-4 grid-flow-col justify-center pt-6">
-                <Select
-                  className="w-64"
-                  label="Channel 1 Output"
-                  labelId="channel-1-output-label"
-                  value={
-                    this.state.outputMediaDevices.find((obj) => {
-                      if (obj == undefined) return false;
-                      return obj.value == this.state.currentMediaOutputs[0];
-                    })?.value
-                  }
-                  items={this.state.outputMediaDevices}
-                  onChange={(event: SelectChangeEvent) => {
-                    let audio = document.getElementById(
-                      "remoteAudioStream"
-                    ) as HTMLAudioElement;
-                    // @ts-ignore
-                    audio.setSinkId(event.target.value).then(() => {
-                      let outputs = this.state.currentMediaOutputs;
-                      outputs[0] = event.target.value;
+            {this.state.started
+              ? this.localStream?.getAudioTracks().map((_, index) => {
+                  return (
+                    <div
+                      className="grid gap-4 grid-flow-col justify-center pt-6"
+                      key={index + 1}
+                    >
+                      <Select
+                        className="w-64"
+                        label={`Channel ${index + 1} Input`}
+                        labelId={`channel-${index + 1}-input-label`}
+                        value={
+                          this.state.inputMediaDevices.find((obj) => {
+                            if (obj == undefined) return false;
+                            return (
+                              obj.value == this.state.currentMediaInputs[index]
+                            );
+                          })?.value
+                        }
+                        items={this.state.inputMediaDevices}
+                        onChange={(event: SelectChangeEvent) => {
+                          let audio = document.getElementById(
+                            `remoteAudioStream${index}`
+                          ) as HTMLAudioElement;
+                          // @ts-ignore
+                          audio.setSinkId(event.target.value).then(() => {
+                            let inputs = this.state.currentMediaInputs;
+                            inputs[index] = event.target.value;
 
-                      this.setState({ currentMediaOutputs: outputs });
-                      console.log(audio);
-                    });
-                  }}
-                />
-              </div>
-            ) : null}
+                            this.setState({ currentMediaInputs: inputs });
+                          });
+                        }}
+                      />
+                      <Select
+                        className="w-64"
+                        label={`Channel ${index + 1} Output`}
+                        labelId={`channel-${index + 1}-output-label`}
+                        value={
+                          this.state.outputMediaDevices.find((obj) => {
+                            if (obj == undefined) return false;
+                            return (
+                              obj.value == this.state.currentMediaOutputs[index]
+                            );
+                          })?.value
+                        }
+                        items={this.state.outputMediaDevices}
+                        onChange={(event: SelectChangeEvent) => {
+                          let audio = document.getElementById(
+                            `remoteAudioStream${index}`
+                          ) as HTMLAudioElement;
+                          // @ts-ignore
+                          audio.setSinkId(event.target.value).then(() => {
+                            let outputs = this.state.currentMediaOutputs;
+                            outputs[index] = event.target.value;
+
+                            this.setState({ currentMediaOutputs: outputs });
+                          });
+                        }}
+                      />
+                    </div>
+                  );
+                })
+              : null}
           </main>
           <Footer />
         </div>
