@@ -55,12 +55,7 @@ class Base extends Component<Props, States> {
   handleSetup = async () => {
     if (typeof window === "undefined") return;
 
-    if (
-      !navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia ||
-      // @ts-ignore
-      !navigator.mediaDevices.selectAudioOutput
-    ) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       console.error("Media device methods not supported.");
       return;
     }
@@ -70,16 +65,19 @@ class Base extends Component<Props, States> {
       audio: true,
     });
 
-    // @ts-ignore
-    let device = await navigator.mediaDevices.selectAudioOutput();
-    let currentOutputs: string[] = new Array(
-      this.state.currentMediaOutputs.length
+    let inputDevice = this.localStream
+      .getAudioTracks()[0]
+      .getSettings().deviceId;
+    let currentInputs: string[] = new Array(
+      this.state.currentMediaInputs.length
     );
 
-    currentOutputs.fill(device.deviceId);
-    this.setState({ currentMediaOutputs: currentOutputs });
+    if (inputDevice) {
+      currentInputs.fill(inputDevice);
+      this.setState({ currentMediaInputs: currentInputs });
+    }
 
-    this.getMediaDevices();
+    await this.getMediaDevices();
 
     for (let i = 0; i < this.numStreams - 1; i++)
       this.localStream?.addTrack(this.localStream.clone().getAudioTracks()[0]);
@@ -95,7 +93,7 @@ class Base extends Component<Props, States> {
       ) as HTMLAudioElement;
       audio.srcObject = this.remoteStreams[i];
       // @ts-ignore
-      audio.setSinkId(currentOutputs[i]);
+      audio.setSinkId(this.state.currentMediaOutputs[i]);
     }
   };
 
@@ -173,9 +171,15 @@ class Base extends Component<Props, States> {
     });
   };
 
-  getMediaDevices = () => {
+  getMediaDevices = async () => {
     let outputMediaDevices: SelectItem[] = [];
     let inputMediaDevices: SelectItem[] = [];
+    let defaultOutputDevice: MediaDeviceInfo;
+    let devicesList: MediaDeviceInfo[];
+
+    let currentOutputs: string[] = new Array(
+      this.state.currentMediaOutputs.length
+    );
 
     if (typeof window === "undefined") return;
 
@@ -184,11 +188,14 @@ class Base extends Component<Props, States> {
       return;
     }
 
-    navigator.mediaDevices
+    await navigator.mediaDevices
       .enumerateDevices()
       .then((devices: MediaDeviceInfo[]) => {
+        devicesList = devices;
         devices.forEach((device: MediaDeviceInfo) => {
-          if (device.kind == "audiooutput")
+          if (device.label.startsWith("Default - "))
+            defaultOutputDevice = device;
+          else if (device.kind == "audiooutput")
             outputMediaDevices.push({
               label: device.label,
               value: device.deviceId,
@@ -200,7 +207,21 @@ class Base extends Component<Props, States> {
             });
         });
       })
-      .then(() => this.setState({ outputMediaDevices: outputMediaDevices }));
+      .then(() => {
+        let outputDevice = devicesList.find(
+          (device) =>
+            device.label ==
+              defaultOutputDevice.label.replace("Default - ", "") &&
+            device.groupId == defaultOutputDevice.groupId
+        );
+
+        currentOutputs.fill(outputDevice?.deviceId!);
+        this.setState({
+          outputMediaDevices: outputMediaDevices,
+          inputMediaDevices: inputMediaDevices,
+          currentMediaOutputs: currentOutputs,
+        });
+      });
   };
 
   render() {
@@ -255,17 +276,45 @@ class Base extends Component<Props, States> {
                           })?.value
                         }
                         items={this.state.inputMediaDevices}
-                        onChange={(event: SelectChangeEvent) => {
-                          let audio = document.getElementById(
-                            `remoteAudioStream${index}`
-                          ) as HTMLAudioElement;
-                          // @ts-ignore
-                          audio.setSinkId(event.target.value).then(() => {
-                            let inputs = this.state.currentMediaInputs;
-                            inputs[index] = event.target.value;
+                        onChange={async (event: SelectChangeEvent) => {
+                          let newStream =
+                            await navigator.mediaDevices.getUserMedia({
+                              video: false,
+                              audio: { deviceId: event.target.value },
+                            });
 
-                            this.setState({ currentMediaInputs: inputs });
-                          });
+                          let mediaStreamTracks: MediaStreamTrack[] = [];
+
+                          for (
+                            let i = index + 1;
+                            i < this.localStream?.getAudioTracks().length!;
+                            i++
+                          ) {
+                            mediaStreamTracks.push(
+                              this.localStream?.getAudioTracks()[i]!
+                            );
+                            this.localStream?.removeTrack(
+                              this.localStream.getAudioTracks()[i]
+                            );
+                            i--;
+                          }
+
+                          this.localStream?.removeTrack(
+                            this.localStream.getAudioTracks()[index]
+                          );
+                          this.localStream?.addTrack(
+                            newStream.getAudioTracks()[0]
+                          );
+
+                          for (let i = 0; i < mediaStreamTracks.length; i++)
+                            this.localStream?.addTrack(mediaStreamTracks[i]);
+
+                          let inputs = this.state.currentMediaInputs;
+                          inputs[index] = event.target.value;
+
+                          this.setState({ currentMediaInputs: inputs });
+
+                          console.log(this.localStream?.getAudioTracks());
                         }}
                       />
                       <Select
