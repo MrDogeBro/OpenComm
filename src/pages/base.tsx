@@ -272,7 +272,7 @@ class Base extends Component<Props, States> {
                       key={index + 1}
                     >
                       <Select
-                        className="w-64"
+                        className="w-80"
                         label={`Channel ${index + 1} Input`}
                         labelId={`channel-${index + 1}-input-label`}
                         value={
@@ -325,7 +325,7 @@ class Base extends Component<Props, States> {
                         }}
                       />
                       <Select
-                        className="w-64"
+                        className="w-80"
                         label={`Channel ${index + 1} Output`}
                         labelId={`channel-${index + 1}-output-label`}
                         value={
