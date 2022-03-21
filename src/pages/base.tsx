@@ -224,6 +224,14 @@ class Base extends Component<Props, States> {
       });
   };
 
+  updateStreamInput = () => {
+    this.connections.forEach((conn) =>
+      conn.getSenders().forEach((sender, idx) => {
+        sender.replaceTrack(this.localStream?.getAudioTracks()[idx]!);
+      })
+    );
+  };
+
   render() {
     return (
       <div>
@@ -313,8 +321,7 @@ class Base extends Component<Props, States> {
                           inputs[index] = event.target.value;
 
                           this.setState({ currentMediaInputs: inputs });
-
-                          console.log(this.localStream?.getAudioTracks());
+                          this.updateStreamInput();
                         }}
                       />
                       <Select
