@@ -28,9 +28,12 @@ class User extends Component<Props, States> {
   private conn: RTCPeerConnection | null = null;
   private localStream: MediaStream | null = null;
   private remoteStream: MediaStream | null = null;
+  private numStreams: number;
 
   constructor(props: Props) {
     super(props);
+
+    this.numStreams = 4;
 
     this.state = {
       muted: [],
@@ -50,7 +53,7 @@ class User extends Component<Props, States> {
       audio: true,
     });
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < this.numStreams - 1; i++) {
       this.localStream?.addTrack(this.localStream.clone().getAudioTracks()[0]);
       this.setState({ muted: [...this.state.muted, true] });
       this.setState({ listening: [...this.state.listening, true] });
