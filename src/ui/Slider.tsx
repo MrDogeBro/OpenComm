@@ -35,17 +35,17 @@ export const Slider: React.FC<SliderProps> = ({
   };
 
   const handleBlur = () => {
-    if (minValue < 0) {
-      setValue(0);
+    if (value < minValue) {
+      setValue(minValue);
     } else if (value > maxValue) {
-      setValue(100);
+      setValue(maxValue);
     }
   };
   return (
     <ThemeProvider theme={muiTheme}>
       <Box sx={{ minWidth: 250 }} className={className}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item lg>
+          <Grid item xl>
             <MuiSlider
               onChange={handleSliderChange}
               value={typeof value === "number" ? value : 0}
