@@ -11,16 +11,16 @@ import { muiTheme } from "@styles/theme";
 export type SliderProps = {
   className?: string;
   id?: string;
-  maxValue?: number;
   minValue?: number;
+  maxValue?: number;
   steps?: number;
 };
 
 export const Slider: React.FC<SliderProps> = ({
   className = "",
   id = "",
-  maxValue = 0,
-  minValue = 100,
+  minValue = 0,
+  maxValue = 100,
   steps = 10,
 }) => {
   const [value, setValue] =
@@ -41,18 +41,19 @@ export const Slider: React.FC<SliderProps> = ({
       setValue(maxValue);
     }
   };
+
   return (
     <ThemeProvider theme={muiTheme}>
-      <Box sx={{ minWidth: 250 }} className={className}>
+      <Box sx={{ width: 250 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xl>
+          <Grid item xs>
             <MuiSlider
-              onChange={handleSliderChange}
               value={typeof value === "number" ? value : 0}
+              onChange={handleSliderChange}
               aria-labelledby="input-slider"
             />
           </Grid>
-          <Grid item xs>
+          <Grid item>
             <MuiInput
               value={value}
               size="small"
