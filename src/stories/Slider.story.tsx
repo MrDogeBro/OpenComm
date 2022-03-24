@@ -9,7 +9,7 @@ export default {
 } as Meta<typeof Slider>;
 
 const TheSlider: Story<SliderProps> = () => {
-  return <Slider />;
+  return <Slider label="Testing" />;
 };
 
 export const Main = TheSlider.bind({});
