@@ -1,30 +1,38 @@
 module.exports = {
-  purge: ['./src/**/*.tsx', './public/index.html'],
-  darkMode: false, // or 'media' or 'class'
+  content: ["./src/**/*.tsx", "./public/index.html"],
   important: true,
   theme: {
     fontFamily: {
       sans: [
-        'Fira Sans',
-        '-apple-system',
-        'BlinkMacSystemFont',
-        'Segoe UI',
-        'Helvetica',
-        'Arial',
-        'sans-serif',
+        "Fira Sans",
+        "-apple-system",
+        "BlinkMacSystemFont",
+        "Segoe UI",
+        "Helvetica",
+        "Arial",
+        "sans-serif",
+      ],
+      roboto: [
+        "Roboto",
+        "Helvetica",
+        "-apple-system",
+        "BlinkMacSystemFont",
+        "Segoe UI",
+        "Arial",
+        "sans-serif",
       ],
     },
     extend: {
       colors: {
         primary: {
-          DEFAULT: 'var(--color-primary-brand)',
-          bg: 'var(--color-primary-background)',
-          fg: 'var(--color-primary-foreground)',
+          DEFAULT: "var(--color-primary-brand)",
+          bg: "var(--color-primary-background)",
+          fg: "var(--color-primary-foreground)",
         },
       },
       inset: {},
       screens: {
-        xs: '508px',
+        xs: "508px",
       },
     },
   },
