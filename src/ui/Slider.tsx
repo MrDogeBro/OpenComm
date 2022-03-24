@@ -12,7 +12,8 @@ export type SliderProps = {
   id?: string;
   minValue?: number;
   maxValue?: number;
-  steps?: number;
+  step?: number;
+  defaultValue?: number;
   label: string;
 };
 
@@ -21,11 +22,12 @@ export const Slider: React.FC<SliderProps> = ({
   id = "",
   minValue = 0,
   maxValue = 100,
-  steps = 10,
+  step = 10,
+  defaultValue = 10,
   label,
 }) => {
   const [value, setValue] =
-    React.useState<number | string | Array<number | string>>(30);
+    React.useState<number | string | Array<number | string>>(defaultValue);
 
   const handleSliderChange = (_: Event, newValue: number | number[]) => {
     setValue(newValue);
@@ -53,6 +55,9 @@ export const Slider: React.FC<SliderProps> = ({
           <MuiSlider
             className="col-span-3"
             value={typeof value === "number" ? value : 0}
+            min={minValue}
+            max={maxValue}
+            defaultValue={defaultValue}
             onChange={handleSliderChange}
             aria-labelledby="input-slider"
           />
@@ -63,7 +68,7 @@ export const Slider: React.FC<SliderProps> = ({
             onChange={handleInputChange}
             onBlur={handleBlur}
             inputProps={{
-              step: steps,
+              step: step,
               min: minValue,
               max: maxValue,
               type: "number",
