@@ -10,19 +10,20 @@ import { muiTheme } from "@styles/theme";
 
 export type UserProps = {
   name: string;
+  className: string;
   image?: string;
   imageAlt?: string;
 };
 
 export const User: React.FC<UserProps> = ({
   name,
+  className = "",
   image = "/assets/defaults/default-user-image.webp",
   imageAlt = "Default user image",
-  ...props
 }) => {
   return (
     <ThemeProvider theme={muiTheme}>
-      <Card>
+      <Card className={className}>
         <CardActionArea>
           <div className="flex">
             <CardMedia
