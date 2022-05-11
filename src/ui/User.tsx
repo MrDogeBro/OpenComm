@@ -8,15 +8,22 @@ import { ThemeProvider } from "@mui/material/styles";
 
 import { muiTheme } from "@styles/theme";
 
+export type UserType = {
+  name: string;
+  id: string;
+};
+
 export type UserProps = {
   name: string;
-  className: string;
+  onClick?: { (): void };
+  className?: string;
   image?: string;
   imageAlt?: string;
 };
 
 export const User: React.FC<UserProps> = ({
   name,
+  onClick = () => {},
   className = "",
   image = "/assets/defaults/default-user-image.webp",
   imageAlt = "Default user image",
@@ -24,7 +31,7 @@ export const User: React.FC<UserProps> = ({
   return (
     <ThemeProvider theme={muiTheme}>
       <Card className={className}>
-        <CardActionArea>
+        <CardActionArea onClick={onClick}>
           <div className="flex">
             <CardMedia
               component="img"
