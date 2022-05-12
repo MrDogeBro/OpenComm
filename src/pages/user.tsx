@@ -68,8 +68,10 @@ class User extends Component<Props, States> {
 
     if (query.userId || query.userName) {
       this.users.forEach((user) => {
-        if (user.id == query.userId) this.setState({ user: user });
-        else if (user.name == query.userName) this.setState({ user: user });
+        if (user.id.toLowerCase() == query.userId.toLowerCase())
+          this.setState({ user: user });
+        else if (user.name.toLowerCase() == query.userName.toLowerCase())
+          this.setState({ user: user });
       });
       this.handleSetup().then(this.handleStart);
     }
@@ -184,7 +186,10 @@ class User extends Component<Props, States> {
                     onClick={() => {
                       this.setState({ user: user });
                       this.props.router.push(
-                        `user?userName=${user.name}&userId=${user.id}`
+                        `user?userName=${user.name.replace(
+                          " ",
+                          "%20"
+                        )}&userId=${user.id.replace(" ", "%20")}`
                       );
                       this.handleSetup().then(this.handleStart);
                     }}
