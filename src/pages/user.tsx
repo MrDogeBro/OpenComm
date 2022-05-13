@@ -135,7 +135,12 @@ class User extends Component<Props, States> {
       type: offerDescription?.type,
     };
 
-    await setDoc(connDoc, { offer });
+    const userInfo = {
+      userName: this.state.user.name,
+      userId: this.state.user.id,
+    };
+
+    await setDoc(connDoc, { offer, userInfo });
 
     onSnapshot(connDoc, (snapshot: any) => {
       const data = snapshot.data();

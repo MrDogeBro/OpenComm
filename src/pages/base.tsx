@@ -161,6 +161,9 @@ class Base extends Component<Props, States> {
 
     await updateDoc(connDoc, { answer });
 
+    const userInfo = connData?.userInfo;
+    console.log("User info: " + userInfo.userName + " " + userInfo.userId);
+
     onSnapshot(offerCandidates, (snapshot: any) => {
       snapshot.docChanges().forEach((change: any) => {
         if (change.type === "added") {
