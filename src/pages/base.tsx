@@ -5,6 +5,7 @@ import { Navbar } from "@ui/Navbar";
 import { Footer } from "@ui/Footer";
 import { Button } from "@ui/Button";
 import { Select, SelectItem } from "@ui/Select";
+import { User as UserCard, UserType } from "@ui/User";
 
 import { sleep } from "@utils/time";
 
@@ -27,6 +28,7 @@ type States = {
   currentMediaOutputs: string[];
   inputMediaDevices: SelectItem[];
   currentMediaInputs: string[];
+  connectedUsers: UserType[];
 };
 
 class Base extends Component<Props, States> {
@@ -49,6 +51,7 @@ class Base extends Component<Props, States> {
       currentMediaOutputs: new Array(this.numStreams),
       inputMediaDevices: new Array(this.numStreams),
       currentMediaInputs: new Array(this.numStreams),
+      connectedUsers: [],
     };
   }
 
@@ -136,14 +139,6 @@ class Base extends Component<Props, States> {
       (e) => e.candidate && addDoc(answerCandidates, e.candidate.toJSON())
     );
 
-    conn.addEventListener("iceconnectionstatechange", async () =>
-      sleep(5000).then(() => {
-        if (conn.iceConnectionState != "disconnected") return;
-
-        console.log("User disconnected");
-      })
-    );
-
     const connData = (await getDoc(connDoc)).data();
 
     const offerDescription = connData?.offer;
@@ -162,7 +157,27 @@ class Base extends Component<Props, States> {
     await updateDoc(connDoc, { answer });
 
     const userInfo = connData?.userInfo;
-    console.log("User info: " + userInfo.userName + " " + userInfo.userId);
+    this.setState({ connectedUsers: [...this.state.connectedUsers, userInfo] });
+
+    conn.addEventListener("iceconnectionstatechange", async () =>
+      sleep(5000).then(() => {
+        if (conn.iceConnectionState != "disconnected") return;
+
+        console.log(this.connections);
+        console.log(this.state.connectedUsers);
+        this.connections = this.connections.filter((value) => {
+          return value != conn;
+        });
+        this.setState({
+          connectedUsers: this.state.connectedUsers.filter((value) => {
+            return value != userInfo;
+          }),
+        });
+        console.log(this.connections);
+        console.log(this.state.connectedUsers);
+        console.log("User disconnected");
+      })
+    );
 
     onSnapshot(offerCandidates, (snapshot: any) => {
       snapshot.docChanges().forEach((change: any) => {
@@ -357,6 +372,16 @@ class Base extends Component<Props, States> {
                   );
                 })
               : null}
+            <div
+              className={`text-white pt-16 mx-auto w-2/4 ${
+                this.state.connectedUsers.length == 0 ? "hidden" : null
+              }`}
+            >
+              <h1 className="text-center mb-4 text-xl">Connected Users</h1>
+              {this.state.connectedUsers.map((user: UserType) => {
+                return <UserCard name={user.name} className="mb-4" />;
+              })}
+            </div>
           </main>
           <Footer />
         </div>
