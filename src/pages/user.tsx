@@ -135,9 +135,9 @@ class User extends Component<Props, States> {
       type: offerDescription?.type,
     };
 
-    const userInfo = {
-      userName: this.state.user.name,
-      userId: this.state.user.id,
+    const userInfo: UserType = {
+      name: this.state.user.name,
+      id: this.state.user.id,
     };
 
     await setDoc(connDoc, { offer, userInfo });
