@@ -39,6 +39,9 @@
       ],
       "@firestore": [
         "src/firestore.ts"
+      ],
+      "@database": [
+        "src/database.ts"
       ]
     }
   },
