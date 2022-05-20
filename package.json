@@ -8,8 +8,9 @@
     "start": "next start",
     "storybook": "start-storybook -s ./public -p 6006",
     "build-storybook": "build-storybook",
-    "firebase": "firebase emulators:start $(cat secrets/firebase-project.txt)",
-    "firebase-serup": "firebase login && mkdir secrets && touch firebase-project.txt"
+    "fbstart": "firebase emulators:start $([[ -d \"firebase-emulator-data\" ]] && echo --import firebase-emulator-data) $(cat secrets/firebase-project.txt) & ",
+    "fbstop": "firebase emulators:export -f --only [\"database\"] firebase-emulator-data $(cat secrets/firebase-project.txt) && kill -15 $(lsof -nP -iTCP -sTCP:LISTEN | grep 4400 | awk '{ print $2 }')",
+    "fbsetup": "firebase login && mkdir secrets && touch firebase-project.txt && firebase setup:emulators:database && firebase setup:emulators:firestore && firebase setup:emulators:ui"
   },
   "dependencies": {
     "@emotion/react": "^11.8.1",
