@@ -11,6 +11,7 @@ import { SelectChangeEvent } from "@mui/material";
 import { sleep } from "@utils/time";
 
 import firestore from "@firestore";
+import { databaseGet } from "@database";
 import {
   collection,
   doc,
@@ -42,7 +43,7 @@ class Base extends Component<Props, States> {
 
     this.connections = [];
     this.remoteStreams = new Array();
-    this.numStreams = 4;
+    this.numStreams = 1;
 
     this.state = {
       initalConnection: true,
@@ -53,6 +54,19 @@ class Base extends Component<Props, States> {
       currentMediaInputs: new Array(this.numStreams),
       connectedUsers: [],
     };
+  }
+
+  componentDidMount() {
+    databaseGet("settings/numChannels", (snapshot) => {
+      this.numStreams = snapshot.val();
+
+      this.setState({
+        outputMediaDevices: new Array(this.numStreams),
+        currentMediaOutputs: new Array(this.numStreams),
+        inputMediaDevices: new Array(this.numStreams),
+        currentMediaInputs: new Array(this.numStreams),
+      });
+    });
   }
 
   handleSetup = async () => {

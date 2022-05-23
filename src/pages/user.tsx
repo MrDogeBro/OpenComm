@@ -41,7 +41,7 @@ class User extends Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.numStreams = 4;
+    this.numStreams = 1;
 
     this.state = {
       muted: [],
@@ -76,6 +76,11 @@ class User extends Component<Props, States> {
 
     databaseGet("users", (snapshot) =>
       this.setState({ users: snapshot.val() })
+    );
+
+    databaseGet(
+      "settings/numChannels",
+      (snapshot) => (this.numStreams = snapshot.val())
     );
   };
 
