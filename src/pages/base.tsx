@@ -6,6 +6,7 @@ import { Footer } from "@ui/Footer";
 import { Button } from "@ui/Button";
 import { Select, SelectItem } from "@ui/Select";
 import { User as UserCard, UserType } from "@ui/User";
+import { SelectChangeEvent } from "@mui/material";
 
 import { sleep } from "@utils/time";
 
@@ -18,7 +19,6 @@ import {
   updateDoc,
   onSnapshot,
 } from "firebase/firestore";
-import { SelectChangeEvent } from "@mui/material";
 
 type Props = {};
 type States = {
@@ -379,7 +379,9 @@ class Base extends Component<Props, States> {
             >
               <h1 className="text-center mb-4 text-xl">Connected Users</h1>
               {this.state.connectedUsers.map((user: UserType) => {
-                return <UserCard name={user.name} className="mb-4" />;
+                return (
+                  <UserCard name={user.name} className="mb-4" key={user.id} />
+                );
               })}
             </div>
           </main>
