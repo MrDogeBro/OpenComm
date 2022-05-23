@@ -2,10 +2,15 @@ import { initializeApp } from "firebase/app";
 import {
   getDatabase,
   connectDatabaseEmulator,
-  Database,
+  ref,
+  child,
+  get,
+  Database as FirebaseDatabase,
+  DatabaseReference,
+  DataSnapshot,
 } from "firebase/database";
 
-let database: Database;
+let database: FirebaseDatabase;
 
 if (process.env.NEXT_PUBLIC_FIREBASE_REMOTE_FIRESTORE == "true") {
   const firebaseConfig = {
@@ -26,3 +31,17 @@ if (process.env.NEXT_PUBLIC_FIREBASE_REMOTE_FIRESTORE == "true") {
 }
 
 export default database;
+export const databaseRef: DatabaseReference = ref(database);
+
+export const databaseGet = (
+  path: string,
+  callback: { (snapshot: DataSnapshot): void }
+) => {
+  get(child(databaseRef, path))
+    .then((snapshot) => {
+      if (snapshot.exists()) callback(snapshot);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
