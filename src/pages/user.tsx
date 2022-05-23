@@ -11,6 +11,7 @@ import { User as UserCard, UserType } from "@ui/User";
 import { Mic } from "@utils/mic";
 
 import firestore from "@firestore";
+import { databaseGet } from "@database";
 import {
   collection,
   doc,
@@ -28,6 +29,7 @@ type States = {
   started: boolean;
   remoteStreamUpdate: boolean;
   user: UserType;
+  users: UserType[];
 };
 
 class User extends Component<Props, States> {
@@ -35,11 +37,6 @@ class User extends Component<Props, States> {
   private localStream: MediaStream | null = null;
   private remoteStream: MediaStream | null = null;
   private numStreams: number;
-
-  private users = [
-    { name: "Testing User", id: "2340df" },
-    { name: "test2 user test", id: "234dfkdfg" },
-  ];
 
   constructor(props: Props) {
     super(props);
@@ -52,6 +49,7 @@ class User extends Component<Props, States> {
       started: false,
       remoteStreamUpdate: true,
       user: { name: "", id: "" },
+      users: [],
     };
 
     if (typeof window !== "undefined") {
@@ -67,7 +65,7 @@ class User extends Component<Props, States> {
     let query = this.props.query;
 
     if (query.userId || query.userName) {
-      this.users.forEach((user) => {
+      this.state.users.forEach((user) => {
         if (user.id.toLowerCase() == query.userId.toLowerCase())
           this.setState({ user: user });
         else if (user.name.toLowerCase() == query.userName.toLowerCase())
@@ -75,6 +73,10 @@ class User extends Component<Props, States> {
       });
       this.handleSetup().then(this.handleStart);
     }
+
+    databaseGet("users", (snapshot) =>
+      this.setState({ users: snapshot.val() })
+    );
   };
 
   handleSetup = async () => {
@@ -183,7 +185,7 @@ class User extends Component<Props, States> {
                 this.state.user.id.length > 0 ? "hidden" : null
               }`}
             >
-              {this.users.map((user) => {
+              {this.state.users.map((user) => {
                 return (
                   <UserCard
                     name={user.name}
