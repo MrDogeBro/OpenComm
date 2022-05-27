@@ -27,7 +27,9 @@ if (process.env.NEXT_PUBLIC_FIREBASE_REMOTE_FIRESTORE == "true") {
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   });
   database = getDatabase();
-  connectDatabaseEmulator(database, "localhost", 9000);
+  try {
+    connectDatabaseEmulator(database, "localhost", 9000);
+  } catch (IllegalStateException) {}
 }
 
 export default database;
