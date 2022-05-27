@@ -43,7 +43,8 @@
       "@database": [
         "src/database.ts"
       ]
-    }
+    },
+    "incremental": true
   },
   "include": [
     "next-env.d.ts",
