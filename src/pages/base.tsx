@@ -43,7 +43,7 @@ class Base extends Component<Props, States> {
 
     this.connections = [];
     this.remoteStreams = new Array();
-    this.numStreams = 1;
+    this.numStreams = 0;
 
     this.state = {
       initalConnection: true,

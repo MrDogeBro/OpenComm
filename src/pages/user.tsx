@@ -41,7 +41,7 @@ class User extends Component<Props, States> {
   constructor(props: Props) {
     super(props);
 
-    this.numStreams = 1;
+    this.numStreams = 0;
 
     this.state = {
       muted: [],
@@ -62,6 +62,15 @@ class User extends Component<Props, States> {
   }
 
   componentDidMount = () => {
+    databaseGet("users", (snapshot) =>
+      this.setState({ users: snapshot.val() })
+    );
+
+    databaseGet(
+      "settings/numChannels",
+      (snapshot) => (this.numStreams = snapshot.val())
+    );
+
     let query = this.props.query;
 
     if (query.userId || query.userName) {
@@ -73,15 +82,6 @@ class User extends Component<Props, States> {
       });
       this.handleSetup().then(this.handleStart);
     }
-
-    databaseGet("users", (snapshot) =>
-      this.setState({ users: snapshot.val() })
-    );
-
-    databaseGet(
-      "settings/numChannels",
-      (snapshot) => (this.numStreams = snapshot.val())
-    );
   };
 
   handleSetup = async () => {
@@ -197,12 +197,12 @@ class User extends Component<Props, States> {
                     className="mb-4"
                     onClick={() => {
                       this.setState({ user: user });
-                      this.props.router.push(
-                        `user?userName=${user.name.replace(
-                          " ",
-                          "%20"
-                        )}&userId=${user.id.replace(" ", "%20")}`
-                      );
+                      // this.props.router.push(
+                      //   `user?userName=${user.name.replace(
+                      //     " ",
+                      //     "%20"
+                      //   )}&userId=${user.id.replace(" ", "%20")}`
+                      // );
                       this.handleSetup().then(this.handleStart);
                     }}
                     key={user.id}
